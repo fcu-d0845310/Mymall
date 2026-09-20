@@ -14,6 +14,7 @@ public class Product {
     private String productName;
     private ProductCategory category;
     private String imageUrl;
+    private Integer price;
     private Integer stock;
     private String description;
     private Date createdDate;
