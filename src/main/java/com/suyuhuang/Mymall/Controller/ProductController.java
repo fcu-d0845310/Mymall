@@ -5,14 +5,19 @@ import com.suyuhuang.Mymall.Model.Product;
 import com.suyuhuang.Mymall.Service.ProductService;
 import com.suyuhuang.Mymall.dto.ProductQueryParams;
 import com.suyuhuang.Mymall.dto.ProductRequest;
+import com.suyuhuang.Mymall.util.Page;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Validated
 @RestController
 @RequiredArgsConstructor
 public class ProductController {
@@ -20,17 +25,35 @@ public class ProductController {
     private final ProductService productService;
 
     @GetMapping("/products")
-    public ResponseEntity<List<Product>> getProducts(
+    public ResponseEntity<Page<Product>> getProducts(
             @RequestParam(required = false) ProductCategory category,//spring boot可以把前端傳過來的值轉換成enum，根據分類來塞選商品
-            @RequestParam(required = false) String search//搜尋功能
+            @RequestParam(required = false) String search,//搜尋功能
+            @RequestParam(defaultValue = "created_date") String orderBy, //依據什麼來進行排序，默認是由最新優先顯示
+            @RequestParam(defaultValue = "desc") String sort, //升降冪
+            @RequestParam(defaultValue = "5") @Max(1000) @Min(0) Integer limit,//取得多少筆商品
+            @RequestParam(defaultValue = "0") @Min(0)Integer offset//跳過多少筆商品
     ){
 
         ProductQueryParams productQueryParams = new ProductQueryParams();
         productQueryParams.setCategory(category);
         productQueryParams.setSearch(search);
+        productQueryParams.setOrderBy(orderBy);
+        productQueryParams.setSort(sort);
+        productQueryParams.setLimit(limit);
+        productQueryParams.setOffset(offset);
 
         List<Product> productList = productService.getProducts(productQueryParams);
-        return ResponseEntity.status(HttpStatus.OK).body(productList);
+
+        //根據查詢條件算有多少商品
+        Integer total = productService.countProduct(productQueryParams);
+
+        Page<Product> page = new Page<>();
+        page.setLimit(limit);
+        page.setOffset(offset);
+        page.setTotal(total);
+        page.setResults(productList);
+
+        return ResponseEntity.status(HttpStatus.OK).body(page);
     }
 
     @GetMapping("/products/{productId}")

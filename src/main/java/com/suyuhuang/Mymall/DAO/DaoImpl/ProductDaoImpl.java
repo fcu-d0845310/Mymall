@@ -22,6 +22,30 @@ public class ProductDaoImpl implements ProductDao {
     private final JdbcClient jdbcClient;
 
     @Override
+    public Integer countProduct(ProductQueryParams productQueryParams) {
+        String sql = "SELECT (*) FROM product WHERE 1=1";
+        Map<String, Object> params = new HashMap<>();
+
+        if (productQueryParams.getCategory() != null)
+        {
+            sql += " AND category = :category";
+
+            params.put("category", productQueryParams.getCategory().name());
+        }
+        if(productQueryParams.getSearch() != null)
+        {
+            sql += " AND product_name LIKE search";
+
+            params.put("search", "%" + productQueryParams.getSearch() + "%");
+        }
+        return jdbcClient.sql(sql)
+                .params(params)
+                .query(Integer.class)
+                .optional()   // 查無資料時安全回傳 Optional.empty()
+                .orElse(0);
+    }
+
+    @Override
     public List<Product> getProducts(ProductQueryParams productQueryParams) {
         String sql = "SELECT product_id, product_name, category, image_url, price, stock, description, " +
                 "created_date, last_modified_date " +
@@ -39,8 +63,15 @@ public class ProductDaoImpl implements ProductDao {
             sql += " AND product_name LIKE search";
             // "%" 代表任意字符 放到map裡面才能夠生效
             params.put("search", "%" + productQueryParams.getSearch() + "%");
-
         }
+
+        sql+= " ORDER BY " +productQueryParams.getOrderBy() + " " + productQueryParams.getSort();
+
+        sql+= " LIMIT :limit OFFSET :offset";
+
+        params.put("limit",productQueryParams.getLimit());
+        params.put("offset",productQueryParams.getOffset());
+
         return jdbcClient.sql(sql)
                 .params(params)
                 .query(Product.class)
