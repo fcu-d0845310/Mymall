@@ -25,19 +25,7 @@ public class ProductDaoImpl implements ProductDao {
     public Integer countProduct(ProductQueryParams productQueryParams) {
         String sql = "SELECT (*) FROM product WHERE 1=1";
         Map<String, Object> params = new HashMap<>();
-
-        if (productQueryParams.getCategory() != null)
-        {
-            sql += " AND category = :category";
-
-            params.put("category", productQueryParams.getCategory().name());
-        }
-        if(productQueryParams.getSearch() != null)
-        {
-            sql += " AND product_name LIKE search";
-
-            params.put("search", "%" + productQueryParams.getSearch() + "%");
-        }
+        sql = addFilterSql(sql,params,productQueryParams);
         return jdbcClient.sql(sql)
                 .params(params)
                 .query(Integer.class)
@@ -52,18 +40,7 @@ public class ProductDaoImpl implements ProductDao {
                 "FROM product WHERE 1=1";
         Map<String, Object> params = new HashMap<>();
 
-        if (productQueryParams.getCategory() != null)
-        {
-            sql += " AND category = :category";
-            // Category 是 Enum，.name() 轉為字串
-            params.put("category", productQueryParams.getCategory().name());
-        }
-        if(productQueryParams.getSearch() != null)
-        {
-            sql += " AND product_name LIKE search";
-            // "%" 代表任意字符 放到map裡面才能夠生效
-            params.put("search", "%" + productQueryParams.getSearch() + "%");
-        }
+        sql = addFilterSql(sql,params,productQueryParams);
 
         sql+= " ORDER BY " +productQueryParams.getOrderBy() + " " + productQueryParams.getSort();
 
@@ -138,5 +115,21 @@ public class ProductDaoImpl implements ProductDao {
         jdbcClient.sql(sql)
                 .param("productId",productId)
                 .update();
+    }
+
+    private String addFilterSql(String sql,Map<String, Object> params,ProductQueryParams productQueryParams){
+        if (productQueryParams.getCategory() != null)
+        {
+            sql += " AND category = :category";
+            // Category 是 Enum，.name() 轉為字串
+            params.put("category", productQueryParams.getCategory().name());
+        }
+        if(productQueryParams.getSearch() != null)
+        {
+            sql += " AND product_name LIKE search";
+            // "%" 代表任意字符 放到map裡面才能夠生效
+            params.put("search", "%" + productQueryParams.getSearch() + "%");
+        }
+        return sql;
     }
 }
