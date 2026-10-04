@@ -2,6 +2,7 @@ package com.suyuhuang.Mymall.Controller;
 
 import com.suyuhuang.Mymall.Model.User;
 import com.suyuhuang.Mymall.Service.UserService;
+import com.suyuhuang.Mymall.dto.UserLoginRequest;
 import com.suyuhuang.Mymall.dto.UserRegisterRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,5 +25,12 @@ public class UserController {
         User user = userService.getUserById(userId);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(user);
+    }
+
+    @PostMapping("/users/login")
+    public ResponseEntity<User> login(@RequestBody @Valid UserLoginRequest userLoginRequest){
+
+        User user = userService.login(userLoginRequest);
+        return ResponseEntity.status(HttpStatus.OK).body(user);
     }
 }

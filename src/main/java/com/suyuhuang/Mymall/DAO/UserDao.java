@@ -6,4 +6,5 @@ import com.suyuhuang.Mymall.dto.UserRegisterRequest;
 public interface UserDao {
     Integer creatUser(UserRegisterRequest userRegisterRequest);
     User getUserById(Integer userId);
+    User getUserByEmail(String email);
 }

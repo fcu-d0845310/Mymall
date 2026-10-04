@@ -43,4 +43,16 @@ public class UserDaoImpl implements UserDao {
                 .optional()
                 .orElse(null);
     }
+
+    @Override
+    public User getUserByEmail(String email) {
+        String sql = "SELECT user_id, email, password, created_date, last_modified_date " +
+                "FROM user WHERE email =:email";
+
+        return jdbcClient.sql(sql)
+                .param("email", email)
+                .query(User.class)
+                .optional()
+                .orElse(null);
+    }
 }
