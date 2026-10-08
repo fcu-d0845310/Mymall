@@ -117,6 +117,17 @@ public class ProductDaoImpl implements ProductDao {
                 .update();
     }
 
+    @Override
+    public void updateStock(Integer productId, Integer stock) {
+        String sql = "UPDATE product set stock = :stock, last_modified_date = :last_modified_date" + " WHERE product_id = :productId";
+        Date now = new Date();
+        jdbcClient.sql(sql)
+                .param("productId", productId)
+                .param("stock,stock")
+                .param("last_modified_date",now)
+                .update();
+    }
+
     private String addFilterSql(String sql,Map<String, Object> params,ProductQueryParams productQueryParams){
         if (productQueryParams.getCategory() != null)
         {
