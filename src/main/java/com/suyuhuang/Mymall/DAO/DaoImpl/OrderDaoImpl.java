@@ -108,6 +108,21 @@ public class OrderDaoImpl implements OrderDao {
                         .list();
         }
 
+        @Override
+        public List<OrderItem> getOrderItemsByOrderIds(List<Integer> orderIds) {
+                if (orderIds.isEmpty()) return List.of();
+
+                String sql = "SELECT oi.order_item_id, oi.order_id, oi.product_id, oi.quantity, oi.amount, " +
+                        "p.product_name, p.image_url " +
+                        "FROM order_item AS oi " +
+                        "LEFT JOIN product AS p ON oi.product_id = p.product_id " +
+                        "WHERE oi.order_id IN (:orderIds)";
+                return jdbcClient.sql(sql)
+                        .param("orderIds", orderIds)
+                        .query(OrderItem.class)
+                        .list();
+        }
+
         private String addFilterSql(String sql, Map<String, Object> params, OrderQueryParams orderQueryParams)
         {
                 if(orderQueryParams.getUserId() != null)

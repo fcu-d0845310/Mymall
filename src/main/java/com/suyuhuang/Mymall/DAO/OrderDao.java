@@ -13,4 +13,5 @@ public interface OrderDao {
     List<OrderItem> getOrderItemsByOrderId(Integer orderId);
     Integer countOrder(OrderQueryParams orderQueryParams);
     List<Order> getOrders(OrderQueryParams orderQueryParams);
+    List<OrderItem> getOrderItemsByOrderIds(List<Integer> orderIds);
 }

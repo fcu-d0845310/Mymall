@@ -22,6 +22,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -98,10 +100,13 @@ public class OrderServiceImpl implements OrderService {
     public List<Order> getOrders(OrderQueryParams orderQueryParams) {
         List<Order> orderList = orderDao.getOrders(orderQueryParams);
 
-        for(Order order: orderList)
-        {
-            List<OrderItem> orderItemList = orderDao.getOrderItemsByOrderId(order.getOrderId());
-            order.setOrderItemList(orderItemList);
+        List<Integer> orderIds = orderList.stream().map(Order::getOrderId).toList();
+        Map<Integer, List<OrderItem>> itemsByOrderId = orderDao.getOrderItemsByOrderIds(orderIds)
+                .stream()
+                .collect(Collectors.groupingBy(OrderItem::getOrderId));
+
+        for (Order order : orderList) {
+            order.setOrderItemList(itemsByOrderId.getOrDefault(order.getOrderId(), List.of()));
         }
         return orderList;
     }
