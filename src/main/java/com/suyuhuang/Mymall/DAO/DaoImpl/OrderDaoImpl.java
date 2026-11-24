@@ -19,7 +19,7 @@ public class OrderDaoImpl implements OrderDao {
 
         private final JdbcClient jdbcClient;
 
-        @Transactional
+
         @Override
         public Integer createOrder(Integer userId, Integer totalAmount) {
                 String sql = "INSERT INTO `order`(user_id, total_amount, created_date, last_modified_date) " +
@@ -29,7 +29,7 @@ public class OrderDaoImpl implements OrderDao {
                 jdbcClient.sql(sql)
                         .param("userId",userId)
                         .param("totalAmount",totalAmount)
-                        .param("createDate",now)
+                        .param("createdDate",now)
                         .param("lastModifiedDate",now)
                         .update(keyHolder,"order_id");
                 return Objects.requireNonNull(keyHolder.getKey()).intValue();
@@ -77,16 +77,9 @@ public class OrderDaoImpl implements OrderDao {
 
         @Override
         public Integer countOrder(OrderQueryParams orderQueryParams) {
-                String sql = "SELECT count(*) FROM `order` WHERE　1=1";
+                String sql = "SELECT count(*) FROM `order` WHERE 1=1";
                 Map<String, Object> params = new HashMap<>();
                 sql = addFilterSql(sql,params,orderQueryParams);
-
-                sql+=" ORDER BY created_date DESC";
-
-                sql+=" LIMIT :limit OFFSET :offset";
-
-                params.put("limit",orderQueryParams.getLimit());
-                params.put("offset",orderQueryParams.getOffset());
 
                 return jdbcClient.sql(sql)
                                 .params(params)
@@ -98,13 +91,16 @@ public class OrderDaoImpl implements OrderDao {
 
         @Override
         public List<Order> getOrders(OrderQueryParams orderQueryParams) {
-                String sql = "SELECT order_id, user_id, created_date,last_modified_date FROM `order` WHERE 1=1";
+                String sql = "SELECT order_id, user_id, total_amount, created_date, last_modified_date FROM `order` WHERE 1=1";
                 Map<String, Object> params = new HashMap<>();
                 sql = addFilterSql(sql,params,orderQueryParams);
 
                 sql+=" ORDER BY created_date DESC";
 
                 sql+=" LIMIT :limit OFFSET :offset";
+
+                params.put("limit",orderQueryParams.getLimit());
+                params.put("offset",orderQueryParams.getOffset());
 
                 return jdbcClient.sql(sql)
                         .params(params)
@@ -116,7 +112,7 @@ public class OrderDaoImpl implements OrderDao {
         {
                 if(orderQueryParams.getUserId() != null)
                 {
-                        sql+=" AND user_id: useId";
+                        sql+=" AND user_id = :userId";
                         params.put("userId",orderQueryParams.getUserId());
                 }
                 return sql;

@@ -23,7 +23,7 @@ public class ProductDaoImpl implements ProductDao {
 
     @Override
     public Integer countProduct(ProductQueryParams productQueryParams) {
-        String sql = "SELECT (*) FROM product WHERE 1=1";
+        String sql = "SELECT count(*) FROM product WHERE 1=1";
         Map<String, Object> params = new HashMap<>();
         sql = addFilterSql(sql,params,productQueryParams);
         return jdbcClient.sql(sql)
@@ -123,7 +123,7 @@ public class ProductDaoImpl implements ProductDao {
         Date now = new Date();
         jdbcClient.sql(sql)
                 .param("productId", productId)
-                .param("stock,stock")
+                .param("stock", stock)
                 .param("last_modified_date",now)
                 .update();
     }
@@ -137,8 +137,8 @@ public class ProductDaoImpl implements ProductDao {
         }
         if(productQueryParams.getSearch() != null)
         {
-            sql += " AND product_name LIKE search";
-            // "%" 代表任意字符 放到map裡面才能夠生效
+            sql += " AND product_name LIKE :search";
+
             params.put("search", "%" + productQueryParams.getSearch() + "%");
         }
         return sql;

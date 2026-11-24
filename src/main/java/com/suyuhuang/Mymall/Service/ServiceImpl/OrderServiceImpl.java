@@ -16,13 +16,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
 
 
-@Repository
+@Service
 @RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService {
 
@@ -32,6 +34,7 @@ public class OrderServiceImpl implements OrderService {
     private final UserDao userDao;
 
     @Override
+    @Transactional
     public Integer createOrder(Integer userId, CreatOrderRequest creatOrderRequest) {
 
         User user = userDao.getUserById(userId);
